@@ -2,6 +2,19 @@ import express from 'express';
 
 const courseGoals = [];
 
+var generateGoals = function() {
+  return `<ul id="goals">
+  ${courseGoals.map(
+    (goal, index) => `
+    <li id="goal-${index}">
+      <span>${goal}</span>
+      <button hx-delete="/remove" hx-vals='{"index": "${index}"}' hx-target="#goals" hx-swap="outerHTML">Remove</button>
+    </li>
+  `
+  ).join('')}
+  </ul>`;
+}
+
 const app = express();
 
 app.use(express.urlencoded({ extended: false }));
@@ -23,10 +36,11 @@ app.get('/', (req, res) => {
         <h1>Manage your course goals</h1>
         <section>
           <form 
-            id="goal-form" 
-            hx-post="/goals" 
-            hx-target="#goals"
-            hx-swap="beforeend">
+            id="goal-form"
+            hx-post="/goals"
+            hx-target="ul"
+            hx-swap="beforeend"
+            >
             <div>
               <label htmlFor="goal">Goal</label>
               <input type="text" id="goal" name="goal" />
@@ -35,16 +49,7 @@ app.get('/', (req, res) => {
           </form>
         </section>
         <section>
-          <ul id="goals">
-          ${courseGoals.map(
-            (goal, index) => `
-            <li id="goal-${index}">
-              <span>${goal}</span>
-              <button>Remove</button>
-            </li>
-          `
-          ).join('')}
-          </ul>
+          ${generateGoals()}
         </section>
       </main>
     </body>
@@ -52,16 +57,23 @@ app.get('/', (req, res) => {
   `);
 });
 
+app.delete('/remove', (req, res) => {
+const index = req.body.index;
+courseGoals.splice(index, 1);
+res.send(generateGoals());
+ });
 app.post('/goals', (req, res) => {
   const goalText = req.body.goal;
   courseGoals.push(goalText);
   // res.redirect('/');
+  const index = courseGoals.length - 1;
   res.send(`
-    <li id="goal-${courseGoals.length - 1}">
+    <li id="goal-${index}">
       <span>${goalText}</span>
-      <button>Remove</button>
-    </li>
+      <button hx-delete="/remove" hx-vals='{"index": "${index}"}' hx-target="#goals" hx-swap="outerHTML">Remove</button>
+      </li>
   `);
 });
+
 
 app.listen(3000);
