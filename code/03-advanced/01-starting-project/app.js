@@ -2,18 +2,14 @@ import express from 'express';
 
 const courseGoals = [];
 
-var generateGoals = function() {
-  return `<ul id="goals">
-  ${courseGoals.map(
-    (goal, index) => `
-    <li id="goal-${index}">
-      <span>${goal}</span>
-      <button hx-delete="/remove" hx-vals='{"index": "${index}"}' hx-target="#goals" hx-swap="outerHTML">Remove</button>
-    </li>
-  `
-  ).join('')}
-  </ul>`;
-}
+const renderGoalListItem = (goal) => `
+   <li>
+     <span>${goal.text}</span>
+     <button hx-delete="/remove/${goal.id}" hx-target="closest li">Remove</button>
+   </li>
+ `;
+
+const renderGoalList = () => `<ul id="goals" hx-swap="outerHTML" hx-confirm="Are You sure?">${courseGoals.map(renderGoalListItem).join('')}</ul>`;
 
 const app = express();
 
@@ -38,8 +34,10 @@ app.get('/', (req, res) => {
           <form 
             id="goal-form"
             hx-post="/goals"
-            hx-target="ul"
+            hx-target="#goals"
             hx-swap="beforeend"
+            hx-on::after-request="this.reset()"
+            hx-disabled-elt="form button"
             >
             <div>
               <label htmlFor="goal">Goal</label>
@@ -49,7 +47,7 @@ app.get('/', (req, res) => {
           </form>
         </section>
         <section>
-          ${generateGoals()}
+          ${renderGoalList()}
         </section>
       </main>
     </body>
@@ -57,23 +55,20 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.delete('/remove', (req, res) => {
-const index = req.body.index;
-courseGoals.splice(index, 1);
-res.send(generateGoals());
- });
-app.post('/goals', (req, res) => {
-  const goalText = req.body.goal;
-  courseGoals.push(goalText);
-  // res.redirect('/');
-  const index = courseGoals.length - 1;
-  res.send(`
-    <li id="goal-${index}">
-      <span>${goalText}</span>
-      <button hx-delete="/remove" hx-vals='{"index": "${index}"}' hx-target="#goals" hx-swap="outerHTML">Remove</button>
-      </li>
-  `);
+app.delete('/remove/:id', (req, res) => {
+  const id = req.params.id;
+  const index = courseGoals.findIndex(ele => ele.id === id)
+  courseGoals.splice(index, 1);
+  res.send();
 });
 
+app.post('/goals', (req, res) => {
+  const goalText = req.body.goal;
+  const goal = {text: goalText, id: new Date().getTime().toString()}
+  courseGoals.push(goal);
+  setTimeout(() => {
+    res.send(renderGoalListItem(goal));
+  }, 1000);
+});
 
 app.listen(3000);
