@@ -113,6 +113,14 @@ app.post('/login', (req, res) => {
       </div>
     `);
   }
+
+  if(Math.random() > 0) {
+    res.setHeader("HX-Retarget", ".control");
+    res.setHeader("HX-Reswap", "afterbegin");
+    return res.send(`
+      <p class="error"> A Servier-side error has occurred, please try again</p>
+    `)
+  }
   res.setHeader("HX-Redirect", "/authenticated");
   res.send();
 });
