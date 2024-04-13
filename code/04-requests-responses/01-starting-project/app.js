@@ -25,7 +25,12 @@ app.get('/', (req, res) => {
       </head>
       <body>
         <main>
-          <form hx-post="/login">
+          <form 
+            hx-post="/login" 
+            hx-headers='{"x-csrf-token" : "abcToken"}' 
+            hx-target="#extra-info"
+            hx-sync="this:replace"
+            >
             <div>
               <img src="/images/auth-icon.jpg" alt="A lock icon" />
             </div>
@@ -35,6 +40,7 @@ app.get('/', (req, res) => {
                 hx-post="/validate" 
                 hx-target="next p"
                 hx-params="email"
+                hx-headers='{"x-csrf-token" : "abcToken"}'
                 type="email" 
                 name="email" 
                 id="email" />
@@ -45,12 +51,14 @@ app.get('/', (req, res) => {
               <input 
                 hx-post="/validate" 
                 hx-target="next p"
-                hx-params="password" 
+                hx-params="password"
+                hx-headers='{"x-csrf-token" : "abcToken"}'
                 type="password" 
                 name="password" 
                 id="password" />
               <p class="error"></p>
             </div>
+            <div id="extra-info"></div>
             <p>
               <button type="submit">
                 Login
@@ -95,7 +103,7 @@ app.post('/login', (req, res) => {
   }
 
   if (Object.keys(errors).length > 0) {
-    res.send(`
+    return res.send(`
       <div id="extra-information">
         <ul id="form-errors">
           ${Object.keys(errors)
@@ -105,6 +113,7 @@ app.post('/login', (req, res) => {
       </div>
     `);
   }
+  res.setHeader("HX-Redirect", "/authenticated");
   res.send();
 });
 
