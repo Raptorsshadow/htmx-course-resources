@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
             ${PRODUCTS.map(
               (product) => `
               <article class="product">
-                <a href="/products/${product.id}">
+                <a hx-get="/products/${product.id}" hx-target="body" hx-push-url="true">
                   <img src="/images/${product.image}" alt="${product.title}" />
                   <div class="product-content">
                     <h3>${product.title}</h3>
@@ -63,7 +63,7 @@ app.get('/products/:id', (req, res) => {
       <body>
         <header id="main-header">
           <div id="main-title">
-            <a href="/">
+            <a hx-get="/" hx-target="body" hx-push-url="true">
               <img src="/logo.png" alt="Elegant model" />
               <h1>Elegant Clothing</h1>
             </a>
