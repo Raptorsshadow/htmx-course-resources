@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
         <link rel="stylesheet" href="/main.css">
         <script src="/htmx.js" defer></script>
       </head>
-      <body>
+      <body hx-boost="true">
         <header id="main-header">
           <div id="main-title">
             <a href="/">
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
             ${PRODUCTS.map(
               (product) => `
               <article class="product">
-                <a hx-get="/products/${product.id}" hx-target="body" hx-push-url="true">
+                <a href="/products/${product.id}">
                   <img src="/images/${product.image}" alt="${product.title}" />
                   <div class="product-content">
                     <h3>${product.title}</h3>
@@ -60,10 +60,10 @@ app.get('/products/:id', (req, res) => {
         <link rel="stylesheet" href="/main.css">
         <script src="/htmx.js" defer></script>
       </head>
-      <body>
+      <body  hx-boost="true">
         <header id="main-header">
           <div id="main-title">
-            <a hx-get="/" hx-target="body" hx-push-url="true">
+            <a href="/">
               <img src="/logo.png" alt="Elegant model" />
               <h1>Elegant Clothing</h1>
             </a>
@@ -87,4 +87,7 @@ app.get('/products/:id', (req, res) => {
   `);
 });
 
+app.post('/cart', (req, res) => {
+  res.redirect('/');
+})
 app.listen(3000);
