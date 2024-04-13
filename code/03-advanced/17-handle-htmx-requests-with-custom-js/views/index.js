@@ -1,6 +1,6 @@
 import renderLocation from './components/location.js';
 
-export default function renderLocationsPage(availableLocations, interestingLocations) {
+export default function renderLocationsPage(suggestedLocations, availableLocations, interestingLocations) {
   return `
     <!DOCTYPE html>
     <html>
@@ -9,9 +9,10 @@ export default function renderLocationsPage(availableLocations, interestingLocat
         <link rel="stylesheet" href="/main.css" />
         <link rel="icon" href="/logo.png" />
         <script src="/htmx.js" defer></script>
+        <script src="/htmx-ext-debug.js" defer></script>
         <script src="/main.js" defer></script>
       </head>
-      <body>
+      <body hx-ext="debug">
         <header>
           <img src="/logo.png" alt="Stylized globe" />
           <h1>PlacePicker</h1>
@@ -21,6 +22,12 @@ export default function renderLocationsPage(availableLocations, interestingLocat
           </p>
         </header>
         <main>
+          <section id="sug-locations-section" class="locations-category">
+            <h2>Currently Suggested Locations</h2>
+            <ul id="suggested-locations" class="locations" hx-get="/suggested" hx-trigger="every 5s">
+              ${suggestedLocations.map((location) => renderLocation(location)).join('')}
+            </ul>
+          </section>
           <section id="int-locations-section" class="locations-category">
             <h2>My Dream Locations</h2>
             <ul id="interesting-locations" class="locations">
@@ -31,7 +38,7 @@ export default function renderLocationsPage(availableLocations, interestingLocat
           <section class="locations-category">
             <h2>Available Locations</h2>
             <ul id="available-locations" class="locations">
-              ${availableLocations.map((location) => renderLocation(location)).join('')}
+              ${availableLocations.filter((location) => suggestedLocations.indexOf(location) < 0).map((location) => renderLocation(location)).join('')}
             </ul>
           </section>
         </main>

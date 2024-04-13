@@ -8,6 +8,25 @@ const app = express();
 
 const INTERESTING_LOCATIONS = [];
 
+function getSuggestedLocations() {
+  const availableLocations = AVAILABLE_LOCATIONS.filter(
+    (location) => !INTERESTING_LOCATIONS.includes(location)
+  );
+
+  if (availableLocations.length < 2) return availableLocations;
+
+  const suggestedLocation1 = availableLocations.splice(
+    Math.floor(Math.random() * availableLocations.length),
+    1
+  )[0];
+  const suggestedLocation2 = availableLocations.splice(
+    Math.floor(Math.random() * availableLocations.length),
+    1
+  )[0];
+
+  return [suggestedLocation1, suggestedLocation2];
+}
+
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 
@@ -15,7 +34,15 @@ app.get('/', (req, res) => {
   const availableLocations = AVAILABLE_LOCATIONS.filter(
     (location) => !INTERESTING_LOCATIONS.includes(location)
   );
-  res.send(renderLocationsPage(availableLocations, INTERESTING_LOCATIONS));
+  const suggestedLocations = getSuggestedLocations();
+  res.send(renderLocationsPage(suggestedLocations, availableLocations, INTERESTING_LOCATIONS));
+});
+
+app.get('/suggested', (req, res) => {
+  const suggestedLocations = getSuggestedLocations();
+  res.send(`
+    ${suggestedLocations.map((location) => renderLocation(location)).join('')}
+`);
 });
 
 app.post('/places', (req, res) => {
@@ -26,12 +53,15 @@ app.post('/places', (req, res) => {
   const availableLocations = AVAILABLE_LOCATIONS.filter(
     (location) => !INTERESTING_LOCATIONS.includes(location)
   );
+  const suggestedLocations = getSuggestedLocations();
 
   res.send(`
     ${renderLocation(location, false)}
-
+    <ul id="suggested-locations" class="locations" hx-swap-oob="innerhHTML">
+      ${suggestedLocations.map((location) => renderLocation(location)).join('')}
+    </ul>
     <ul id="available-locations" class="locations" hx-swap-oob="true">
-      ${availableLocations.map((location) => renderLocation(location)).join('')}
+      ${availableLocations.filter((location) => suggestedLocations.indexOf(location) < 0).map((location) => renderLocation(location)).join('')}
     </ul>
   `);
 });
@@ -46,10 +76,14 @@ app.delete('/places/:id', (req, res) => {
   const availableLocations = AVAILABLE_LOCATIONS.filter(
     (location) => !INTERESTING_LOCATIONS.includes(location)
   );
+  const suggestedLocations = getSuggestedLocations();
 
   res.send(`
+  <ul id="suggested-locations" class="locations" hx-swap-oob="innerhHTML">
+      ${suggestedLocations.map((location) => renderLocation(location)).join('')}
+    </ul>
   <ul id="available-locations" class="locations" hx-swap-oob="true">
-    ${availableLocations.map((location) => renderLocation(location)).join('')}
+    ${availableLocations.filter((location) => suggestedLocations.indexOf(location) < 0).map((location) => renderLocation(location)).join('')}
   </ul>
   `);
 });
