@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
               <input 
                 hx-post="/validate" 
                 hx-target="next p"
+                hx-params="email"
                 type="email" 
                 name="email" 
                 id="email" />
@@ -43,7 +44,8 @@ app.get('/', (req, res) => {
               <label for="password">Password</label>
               <input 
                 hx-post="/validate" 
-                hx-target="next p" 
+                hx-target="next p"
+                hx-params="password" 
                 type="password" 
                 name="password" 
                 id="password" />
