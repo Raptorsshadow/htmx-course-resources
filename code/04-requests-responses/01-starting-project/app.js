@@ -22,19 +22,23 @@ app.get('/', (req, res) => {
         />
         <link rel="stylesheet" href="/main.css" />
         <script src="/htmx.js" defer></script>
+        <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/response-targets.js" defer></script>
       </head>
       <body>
         <main>
           <form 
+            hx-ext="response-targets"
             hx-post="/login" 
             hx-headers='{"x-csrf-token" : "abcToken"}' 
-            hx-target="#extra-info"
+            hx-target-422="#extra-info"
+            hx-target-500="#server-side-error"
             hx-sync="this:replace"
             >
             <div>
               <img src="/images/auth-icon.jpg" alt="A lock icon" />
             </div>
             <div class="control">
+              <div id="server-side-error"></div>
               <label for="email">Email</label>
               <input 
                 hx-post="/validate" 
@@ -103,7 +107,7 @@ app.post('/login', (req, res) => {
   }
 
   if (Object.keys(errors).length > 0) {
-    return res.send(`
+    return res.status(422).send(`
       <div id="extra-information">
         <ul id="form-errors">
           ${Object.keys(errors)
@@ -115,9 +119,7 @@ app.post('/login', (req, res) => {
   }
 
   if(Math.random() > 0) {
-    res.setHeader("HX-Retarget", ".control");
-    res.setHeader("HX-Reswap", "afterbegin");
-    return res.send(`
+    return res.status(500).send(`
       <p class="error"> A Servier-side error has occurred, please try again</p>
     `)
   }
